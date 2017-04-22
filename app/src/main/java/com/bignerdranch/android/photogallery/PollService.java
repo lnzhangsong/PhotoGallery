@@ -22,6 +22,11 @@ import java.util.List;
  * activity在前台运行
  */
 
+/*
+context(上下文) android应用的控制中心 程序的私有文件 设备资源 以及整个系统的服务
+*提供访问整个应用程序范围的功能*
+ */
+
 public class PollService extends IntentService {
     private static final String TAG = "PollService";
     private static final int POLL_INTERVAL = 1000 * 60 ; // 60 seconds
@@ -31,6 +36,7 @@ public class PollService extends IntentService {
     }
 
     //为了能够在后台持续运行服务 最小时间间隔为60s
+
     public static void setServiceAlarm(Context context, boolean isOn) {             //启停定时器方法
         Intent i = PollService.newIntent(context);                              //引用newIntent()方法
 

@@ -30,6 +30,7 @@ import java.util.List;
  */
 
 /*获取inflater的三种方法
+LayoutInflater的作用找res/layout的xml文件
 1.LayoutInflater inflater = getLayoutInflater();  //调用Activity的getLayoutInflater()
 2.LayoutInflater localinflater =(LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 3.LayoutInflater inflater = LayoutInflater.from(context);
