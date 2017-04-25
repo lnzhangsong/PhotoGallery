@@ -11,6 +11,7 @@ import android.preference.PreferenceManager;
 public class QueryPreferences {
     private static final String PREF_SEARCH_QUERY = "searchQuery";          //用于activity
     private static final String PREF_LAST_RESULT_ID = "lastResultId";       //用于后台服务 存储图片id
+    private static final String PREF_IS_ALARM_ON = "isAlarmOn";             //用于重启后接收信息 关于boardcast intent
 
     //下面这两个方法用于存储上一次查询的数据
     //context指的值系统组件 eg:activity
@@ -36,6 +37,18 @@ public class QueryPreferences {
         PreferenceManager.getDefaultSharedPreferences(context)
                 .edit()
                 .putString(PREF_LAST_RESULT_ID, lastResultId)
+                .apply();
+    }
+
+    //以下两个方法是用于boardcast intent
+    public static boolean isAlarmOn(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getBoolean(PREF_IS_ALARM_ON, false);
+    }
+    public static void setAlarmOn(Context context, boolean isOn) {
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit()
+                .putBoolean(PREF_IS_ALARM_ON, isOn)
                 .apply();
     }
 }

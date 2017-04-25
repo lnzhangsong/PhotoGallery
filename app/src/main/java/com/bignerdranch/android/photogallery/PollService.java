@@ -30,6 +30,8 @@ context(上下文) android应用的控制中心 程序的私有文件 设备资�
 public class PollService extends IntentService {
     private static final String TAG = "PollService";
     private static final int POLL_INTERVAL = 1000 * 60 ; // 60 seconds
+    //用于发送定制broadcast intent
+    public static final String ACTION_SHOW_NOTIFICATION = "com.bignerdranch.android.photogallery.SHOW_NOTIFICATION";
 
     public static Intent newIntent(Context context) {           //android规范 无论谁想用这个服务都必须使用这个方法 规定但是原理是啥???
         return new Intent(context, PollService.class);
@@ -67,6 +69,8 @@ public class PollService extends IntentService {
             //一般情况下也需要取消PendingIntent
             pi.cancel();
         }
+        //存储定时器状态 用于boardcast intent
+        QueryPreferences.setAlarmOn(context,isOn);
     }
 
     //判断PendingIntent是否激活
@@ -80,6 +84,7 @@ public class PollService extends IntentService {
     public PollService() {
         super(TAG);
     }
+
     @Override
     protected void onHandleIntent(Intent intent) {              //针对每一个命令在后台运行这方法
         if(!isNetworkAvailableAndConnected())                   //如果连不上网 直接结束服务
@@ -101,23 +106,27 @@ public class PollService extends IntentService {
             Log.i(TAG, "Got an old result: " + resultId);
         } else {
             Log.i(TAG, "Got a new result: " + resultId);
-        }
 
-        Resources resources = getResources();                       //获取资源文件
-        Intent i = PhotoGalleryActivity.newIntent(this);            //获取PhotoGalleryActivity的intent
-        PendingIntent pi = PendingIntent.getActivity(this, 0, i, 0);        //和上面PendingIntent方法一致
-        //通知信息
-        Notification notification = new NotificationCompat.Builder(this)
-                .setTicker(resources.getString(R.string.new_pictures_title))        //配置状态栏文字
-                .setSmallIcon(android.R.drawable.ic_menu_report_image)              //配置小图标
-                .setContentTitle(resources.getString(R.string.new_pictures_title))  //设置标题
-                .setContentText(resources.getString(R.string.new_pictures_text))    //显示的文字
-                .setContentIntent(pi)                                               //再点击消息的时候 该方法里面的PendingIntent会触发
-                .setAutoCancel(true)                                                //触发消息后 Notification自动消失
-                .build();
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);   //从当前context获取NotificationManagerCompat对象
-        //贴出消息 第一个参数是标识符 如果是同一标志符那么新的消息会覆盖旧的 在开发中进度条以及其他视觉效果实现的方式
-        notificationManager.notify(0, notification);
+            //以下是发送通知消息
+            Resources resources = getResources();                       //获取资源文件
+            Intent i = PhotoGalleryActivity.newIntent(this);            //获取PhotoGalleryActivity的intent
+            PendingIntent pi = PendingIntent.getActivity(this, 0, i, 0);        //和上面PendingIntent方法一致
+            //通知信息
+            Notification notification = new NotificationCompat.Builder(this)
+                    .setTicker(resources.getString(R.string.new_pictures_title))        //配置状态栏文字
+                    .setSmallIcon(android.R.drawable.ic_menu_report_image)              //配置小图标
+                    .setContentTitle(resources.getString(R.string.new_pictures_title))  //设置标题
+                    .setContentText(resources.getString(R.string.new_pictures_text))    //显示的文字
+                    .setContentIntent(pi)                                               //再点击消息的时候 该方法里面的PendingIntent会触发
+                    .setAutoCancel(true)                                                //触发消息后 Notification自动消失
+                    .build();
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);   //从当前context获取NotificationManagerCompat对象
+            //贴出消息 第一个参数是标识符 如果是同一标志符那么新的消息会覆盖旧的 在开发中进度条以及其他视觉效果实现的方式
+            notificationManager.notify(0, notification);
+
+            //发送定制的broadcast intent
+            sendBroadcast(new Intent(ACTION_SHOW_NOTIFICATION));
+        }
 
         QueryPreferences.setLastResultId(this, resultId);           //将最新的数据写入QueryPreferences
     }
